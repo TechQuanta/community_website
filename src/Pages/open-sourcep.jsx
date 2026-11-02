@@ -1,4 +1,5 @@
 import React, { useState, useEffect, memo } from "react";
+import { ArrowUpRight, Github, PackageOpen } from "lucide-react";
 
 /* =========================================
    CONSTANTS
@@ -24,6 +25,36 @@ const mockProjectDefinition = {
 
   language: "TypeScript",
 };
+
+const featuredProjects = [
+  {
+    name: "init-app",
+    category: "Python library",
+    description:
+      "An interactive Python CLI for scaffolding backend projects with a guided setup and ready-to-use foundation.",
+    detail: "pip install init-app",
+    icon: PackageOpen,
+    links: [
+      { label: "PyPI package", href: "https://pypi.org/project/init-app/" },
+      { label: "Contribute on GitHub", href: "https://github.com/TechQuanta/init-app" },
+    ],
+  },
+  {
+    name: "GitHub Avatar Frame",
+    category: "Community project",
+    description:
+      "A service for creating custom framed GitHub profile avatars. Explore the app or contribute to its open-source repository.",
+    detail: "Built with TypeScript",
+    icon: Github,
+    links: [
+      { label: "Try the app", href: "https://frame-avatars.vercel.app/" },
+      {
+        label: "Contribute on GitHub",
+        href: "https://github.com/TechQuanta/github-avatar-frame-api",
+      },
+    ],
+  },
+];
 
 /* =========================================
    ICONS
@@ -121,20 +152,6 @@ const fetchBaseContributorData = async () => {
 ========================================= */
 
 const ContributorTile = memo(({ contributor, index }) => {
-  const glowColors = [
-    "shadow-purple-500/20",
-
-    "shadow-pink-500/20",
-
-    "shadow-cyan-500/20",
-
-    "shadow-orange-500/20",
-
-    "shadow-emerald-500/20",
-
-    "shadow-blue-500/20",
-  ];
-
   const gradients = [
     "from-purple-500/20 to-pink-500/10",
 
@@ -163,17 +180,7 @@ const ContributorTile = memo(({ contributor, index }) => {
 
           rounded-[32px]
 
-          border
-
-          border-black/5
-
-          dark:border-white/[0.06]
-
-          bg-white/70
-
-          dark:bg-[#070707]/95
-
-          backdrop-blur-3xl
+          bg-transparent
 
           p-5
 
@@ -256,11 +263,6 @@ const ContributorTile = memo(({ contributor, index }) => {
 
               rounded-2xl
 
-              border
-
-              border-white/20
-
-              dark:border-white/[0.08]
             "
         >
           <img
@@ -447,11 +449,11 @@ const ProjectHero = ({ project }) => {
 
         rounded-[40px]
 
-        dark:border-white/[0.06]
-
         bg-transparent
 
-        p-8
+        p-5
+
+        sm:p-8
       "
     >
       {/* Background Glow */}
@@ -504,12 +506,6 @@ const ProjectHero = ({ project }) => {
 
             rounded-full
 
-            border
-
-            border-black/5
-
-            dark:border-white/[0.08]
-
             px-4
             py-2
 
@@ -531,7 +527,9 @@ const ProjectHero = ({ project }) => {
           className="
             mt-6
 
-            text-6xl
+            text-4xl
+
+            sm:text-6xl
 
             lg:text-7xl
 
@@ -683,19 +681,13 @@ const ProjectHero = ({ project }) => {
               className="
                   rounded-[28px]
 
-                  border
-
-                  border-black/5
-
-                  dark:border-white/[0.06]
-
                   bg-black/[0.03]
 
                   dark:bg-white/[0.03]
 
-                  p-5
+                  p-4
 
-                  backdrop-blur-xl
+                  sm:p-5
                 "
             >
               <div
@@ -868,10 +860,15 @@ export default function App() {
 
         min-h-screen
 
-        overflow-hidden
+        overflow-x-hidden
 
-        px-6
-        py-10
+        px-4
+        pt-20
+        pb-8
+
+        sm:px-6
+        sm:pt-24
+        sm:pb-10
       "
     >
 
@@ -902,44 +899,88 @@ export default function App() {
 
           z-10
 
-          mx-auto
-
-          max-w-[1700px]
+          w-full
         "
       >
+        <section aria-labelledby="projects-title" className="mb-12">
+          <div className="mb-6">
+            <p className="font-rajdhani text-sm font-bold uppercase tracking-[0.2em] text-emerald-600 dark:text-cyan-300">
+              Find your next contribution
+            </p>
+            <h2
+              id="projects-title"
+              className="mt-2 font-rajdhani text-4xl font-black text-gray-900 dark:text-white sm:text-5xl"
+            >
+              Explore our projects
+            </h2>
+            <p className="mt-2 max-w-2xl text-gray-600 dark:text-gray-300">
+              Browse what the community is building and choose a project that
+              matches your interests.
+            </p>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-2">
+            {featuredProjects.map((project) => {
+              const Icon = project.icon;
+
+              return (
+                <article
+                  key={project.name}
+                  className="rounded-[28px] bg-gradient-to-br from-emerald-400/10 via-white/30 to-cyan-400/10 p-6 dark:via-white/[0.03] sm:p-8"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <span className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
+                        <Icon aria-hidden="true" size={15} />
+                        {project.category}
+                      </span>
+                      <h3 className="mt-4 font-rajdhani text-3xl font-black text-gray-900 dark:text-white">
+                        {project.name}
+                      </h3>
+                    </div>
+                  </div>
+                  <p className="mt-3 min-h-[3.5rem] leading-relaxed text-gray-600 dark:text-gray-300">
+                    {project.description}
+                  </p>
+                  <p className="mt-4 font-mono text-sm text-gray-700 dark:text-gray-200">
+                    {project.detail}
+                  </p>
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    {project.links.map((link, index) => (
+                      <a
+                        key={link.href}
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`!transition-none inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold ${
+                          index === project.links.length - 1
+                            ? "bg-gray-900/5 !text-gray-900 hover:bg-gray-900/10 dark:bg-white/10 dark:!text-white dark:hover:bg-white/15"
+                            : "bg-[#2ECC71] !text-gray-950 hover:bg-[#25b863]"
+                        }`}
+                      >
+                        {link.label}
+                        <ArrowUpRight aria-hidden="true" size={16} />
+                      </a>
+                    ))}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+
         {/* TOP */}
 
-        <div
-          className="
-            mb-10
-
-            flex
-            flex-col
-
-            gap-8
-
-            lg:flex-row
-          "
-        >
+          <div className="mb-10 grid gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
           {/* LEFT */}
 
-          <div className="lg:w-[60%]">
+          <div className="min-w-0">
             <ProjectHero project={currentProject} />
           </div>
 
           {/* RIGHT */}
 
-          <div
-            className="
-              lg:w-[40%]
-
-              grid
-
-              gap-5
-
-              sm:grid-cols-2
-            "
-          >
+          <div className="grid min-w-0 gap-5 sm:grid-cols-2">
             {currentProject.contributors
               .slice(0, 6)
               .map((contributor, index) => (
@@ -960,19 +1001,11 @@ export default function App() {
 
             rounded-[40px]
 
-            border
+            bg-transparent
 
-            border-black/5
+            p-4
 
-            dark:border-white/[0.06]
-
-            bg-white/60
-
-            dark:bg-[#050505]/90
-
-            backdrop-blur-3xl
-
-            p-6
+            sm:p-6
           "
         >
           <div
@@ -984,7 +1017,7 @@ export default function App() {
             "
           >
           {currentProject.contributors.map(
-  (contributor, index) => (
+  (contributor) => (
 
     <a
   key={contributor.login}
@@ -1054,10 +1087,6 @@ export default function App() {
 
           rounded-full
 
-          border
-
-          border-white/10
-
           bg-black/95
 
           px-4
@@ -1073,7 +1102,6 @@ export default function App() {
 
           shadow-[0_10px_40px_rgba(0,0,0,0.45)]
 
-          backdrop-blur-2xl
         "
       >
         {contributor.name}
@@ -1091,12 +1119,6 @@ export default function App() {
           w-3
 
           rotate-45
-
-          border-r
-
-          border-b
-
-          border-white/10
 
           bg-black/95
         "
@@ -1116,20 +1138,12 @@ export default function App() {
 
         rounded-2xl
 
-        border
-
-        border-white/20
-
-        dark:border-white/[0.08]
-
         transition-all
         duration-500
 
         group-hover:scale-110
 
         group-hover:-translate-y-1
-
-        group-hover:border-purple-400/40
 
         group-hover:shadow-[0_0_30px_rgba(168,85,247,0.35)]
       "

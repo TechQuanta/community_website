@@ -49,6 +49,20 @@ We’re building this project using modern, scalable tools:
 > **Open for collaboration until: 🗓️ 30th May**  
 > We welcome developers, designers, writers, and documenters!
 
+### Contributor roadmap and theme
+
+The leaderboard opens each contributor's roadmap by looking for their public fork
+of the configured GitHub repository (or a public same-name clone). By default, it
+tracks `TechQuanta/Tech_Quanta_community_website`. To track another public
+repository, set `VITE_CONTRIBUTION_REPO=owner/repository` in the Vite environment
+before starting or building the site. Commit messages in the contributor's copy
+show completed work, and pull requests are checked against the configured upstream.
+The first pushed commit completes the combined `git add`, `git commit`, and
+`git push` milestone; GitHub cannot verify local-only commands or private activity.
+
+Use the sun/moon control in the navigation bar to change the site theme. The
+selection is saved in the browser and is used across the site.
+
 ### 🔧 Setup Instructions
 
 ```bash

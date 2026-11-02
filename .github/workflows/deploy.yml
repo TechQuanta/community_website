@@ -4,9 +4,10 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      # This specifies which branch will trigger the workflow.
-      # Make sure this matches your main development branch (e.g., 'main' or 'master').
-      - deploy # Most common, but use 'deploy' if that's your specific branch
+      # Trigger deployment from the repo's main branch or the dedicated deploy branch.
+      - main
+      - master
+      - deploy
 
 jobs:
   build-and-deploy:

@@ -5,6 +5,7 @@ import { Helmet } from "react-helmet";
 import Loading from "../components/ui/loader";
 
 import { useGitHubLeaderboardData } from "../hooks/GraphQlQuery";
+import ContributorRoadmap from "../components/Leaderboard/ContributorRoadmap";
 
 /* =========================
    ASSETS
@@ -86,80 +87,82 @@ function getBadgeInfoByScore(score) {
   return badges[badges.length - 1];
 }
 
-/* =========================
-   CARD COLORS
-========================= */
+function useDesktopLayout() {
+  const [isDesktop, setIsDesktop] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches
+  );
 
-const lightThemes = [
-  `
-    from-[#f4d7ff]
-    to-[#ffd7d7]
-    border-[#ffffff]
-  `,
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(min-width: 1024px)");
+    const updateLayout = (event) => setIsDesktop(event.matches);
+    mediaQuery.addEventListener("change", updateLayout);
+    return () => mediaQuery.removeEventListener("change", updateLayout);
+  }, []);
 
-  `
-    from-[#d7e8ff]
-    to-[#e8dcff]
-    border-[#ffffff]
-  `,
+  return isDesktop;
+}
 
-  `
-    from-[#ffe4d6]
-    to-[#ffd7f1]
-    border-[#ffffff]
-  `,
+const ContributorListItem = memo(({ user, active, onSelect }) => {
+  const badge = getBadgeInfoByScore(user.score);
 
-  `
-    from-[#d7fff0]
-    to-[#d7e8ff]
-    border-[#ffffff]
-  `,
-];
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(user)}
+      aria-pressed={active}
+      aria-label={`Show ${user.username}'s roadmap`}
+      className={`flex w-full min-w-0 items-center gap-3 rounded-2xl p-3 text-left transition-colors ${
+        active
+          ? "bg-emerald-500/10 dark:bg-sky-400/10"
+          : "bg-transparent hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
+      }`}
+      style={{ border: 0, color: "inherit" }}
+    >
+      <img
+        src={`https://github.com/${user.username}.png`}
+        alt=""
+        loading="lazy"
+        className="h-10 w-10 shrink-0 rounded-xl object-cover"
+      />
+      <span className="min-w-0 flex-1">
+        <span className="block truncate font-rajdhani text-lg font-bold">{user.username}</span>
+        <span className="block text-xs text-gray-500 dark:text-white/45">
+          {user.score} TQ points
+        </span>
+      </span>
+      <img src={badge.src} alt={badge.name} className="h-7 w-7 shrink-0 object-contain" />
+    </button>
+  );
+});
 
 /* =========================
    USER CARD
 ========================= */
 
-const UserCard = memo(({ user, index, filterActive }) => {
-  const rank = index + 1;
-
+const UserCard = memo(({ user, filterActive, onSelect }) => {
   const badge = getBadgeInfoByScore(user.score);
 
-  const githubUrl = `https://github.com/${user.username}`;
-
-  const lightTheme = lightThemes[index % lightThemes.length];
-
   return (
-    <a
-      href={githubUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group"
+    <button
+      type="button"
+      onClick={() => onSelect(user)}
+      aria-label={`View ${user.username}'s contribution roadmap`}
+      className="group w-full cursor-pointer text-left"
+      style={{
+        background: "transparent",
+        border: 0,
+        padding: 0,
+        color: "inherit",
+      }}
     >
       <div
         className={`
-            relative
-
-            overflow-hidden
-
-            rounded-[34px]
-
-            border
-
-            p-[1px]
-
-            transition-all
-            duration-500
-
-            hover:-translate-y-2
-
-            dark:border-white/[0.08]
-
-            bg-gradient-to-br
-
-            ${lightTheme}
-
-            dark:bg-none
+            relative overflow-hidden rounded-[34px] border border-gray-300/45
+            bg-white/10 p-[1px] shadow-[0_12px_40px_rgba(0,0,0,0.06)]
+            backdrop-blur-2xl transition-all duration-500 hover:-translate-y-2
+            hover:shadow-[0_20px_60px_rgba(0,0,0,0.12)]
+            dark:border-white/[0.1] dark:bg-white/[0.025] dark:shadow-black/20
+            dark:hover:shadow-black/40
           `}
       >
         {/* SHINY BORDER */}
@@ -227,26 +230,8 @@ const UserCard = memo(({ user, index, filterActive }) => {
               transition-all
               duration-500
 
-              dark:bg-[#050505]/95
-
-              bg-blackz
-
-              dark:from-[#0a0a0a]
-
-              dark:to-[#050505]
-
-              from-white/90
-              to-white/70
-
-              backdrop-blur-3xl
-
-              shadow-[0_10px_40px_rgba(0,0,0,0.12)]
-
-              dark:shadow-[0_15px_50px_rgba(0,0,0,0.55)]
-
-              group-hover:shadow-[0_20px_60px_rgba(0,0,0,0.2)]
-
-              dark:group-hover:shadow-[0_20px_60px_rgba(0,0,0,0.75)]
+              border border-white/40 bg-white/15 backdrop-blur-2xl
+              dark:border-white/[0.06] dark:bg-black/10
             "
         >
           {/* DARK GLOW */}
@@ -395,9 +380,9 @@ const UserCard = memo(({ user, index, filterActive }) => {
 
                     border-black/5
 
-                    dark:bg-white/[0.03]
+                    dark:bg-white/[0.025]
 
-                    bg-black/[0.03]
+                    bg-white/10
 
                     px-5
                     py-3
@@ -458,9 +443,9 @@ const UserCard = memo(({ user, index, filterActive }) => {
 
                 border-black/5
 
-                dark:bg-white/[0.03]
+                dark:bg-white/[0.025]
 
-                bg-black/[0.03]
+                bg-white/10
 
 
 
@@ -494,7 +479,7 @@ const UserCard = memo(({ user, index, filterActive }) => {
           </div>
         </div>
       </div>
-    </a>
+    </button>
   );
 });
 
@@ -506,13 +491,10 @@ export default function Leaderboard() {
   const {
     userStats,
     loading,
-
     filterActive,
-
-    showActiveMembers,
-    showAllMembers,
-
-    loadingFilter,
+    error,
+    allDataNull,
+    fetchAllLeaderboardData,
   } = useGitHubLeaderboardData();
 
   const [search, setSearch] = useState("");
@@ -520,16 +502,22 @@ export default function Leaderboard() {
   const [sortKey, setSortKey] = useState("scoreDesc");
 
   const [imageIndex, setImageIndex] = useState(0);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const isDesktop = useDesktopLayout();
 
   /* GIF ROTATION */
 
   useEffect(() => {
+    if (selectedUser) {
+      return undefined;
+    }
+
     const interval = setInterval(() => {
       setImageIndex((i) => (i + 1) % rotatingImages.length);
     }, 4000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [selectedUser]);
 
   /* FILTER */
 
@@ -575,17 +563,85 @@ export default function Leaderboard() {
     );
   }
 
+  if (selectedUser && !isDesktop) {
+    return (
+      <ContributorRoadmap
+        user={selectedUser}
+        onBack={() => setSelectedUser(null)}
+      />
+    );
+  }
+
+  if (selectedUser && isDesktop) {
+    return (
+      <div className="min-h-screen px-5 pb-8 pt-24">
+        <Helmet>
+          <title>{selectedUser.username}&apos;s Contribution Roadmap</title>
+        </Helmet>
+        <div className="mx-auto w-full max-w-[1700px]">
+          <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(260px,340px)_minmax(0,1fr)]">
+            <aside className="sticky top-24 h-fit max-h-[calc(100vh-7rem)] min-w-0 overflow-y-auto pr-2">
+              <div className="mb-5 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-700 dark:text-sky-300">
+                    Contributors
+                  </p>
+                  <h1 className="mt-1 font-rajdhani text-3xl font-black">Profiles</h1>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedUser(null)}
+                  className="text-sm font-semibold text-gray-600 underline underline-offset-4 hover:text-emerald-700 dark:text-white/60 dark:hover:text-sky-300"
+                  style={{ background: "transparent", border: 0, padding: 0 }}
+                >
+                  All cards
+                </button>
+              </div>
+
+              <label className="mb-3 block">
+                <span className="sr-only">Search contributors</span>
+                <input
+                  type="search"
+                  placeholder="Search profiles..."
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  className="w-full rounded-xl bg-black/[0.04] px-3 py-2 text-sm outline-none placeholder:text-gray-500 focus:bg-black/[0.07] dark:bg-white/[0.06] dark:placeholder:text-white/40 dark:focus:bg-white/[0.1]"
+                />
+              </label>
+              <select
+                value={sortKey}
+                onChange={(event) => setSortKey(event.target.value)}
+                aria-label="Sort contributor profiles"
+                className="mb-4 w-full rounded-xl bg-black/[0.04] px-3 py-2 text-sm font-semibold outline-none dark:bg-white/[0.06]"
+              >
+                <option value="scoreDesc">Highest points</option>
+                <option value="scoreAsc">Lowest points</option>
+                <option value="alphaAZ">A-Z name</option>
+              </select>
+
+              <div className="space-y-1">
+                {filteredUsers.map((user) => (
+                  <ContributorListItem
+                    key={user.username}
+                    user={user}
+                    active={user.username === selectedUser.username}
+                    onSelect={setSelectedUser}
+                  />
+                ))}
+              </div>
+            </aside>
+
+            <section className="min-w-0" aria-label={`${selectedUser.username}'s roadmap`}>
+              <ContributorRoadmap user={selectedUser} onBack={() => setSelectedUser(null)} embedded />
+            </section>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div
-      className="
-        min-h-screen
-
-        px-5
-        py-8
-
-        overflow-hidden
-      "
-    >
+    <div className="min-h-screen overflow-hidden px-5 pb-8 pt-24">
       <Helmet>
         <title>Continue Your Open Source Journey</title>
       </Helmet>
@@ -746,9 +802,9 @@ export default function Leaderboard() {
 
                 border-black/5
 
-                dark:bg-[#050505]/90
+                dark:bg-black/15
 
-                bg-white/70
+                bg-white/15
 
                 px-5
                 py-4
@@ -808,9 +864,9 @@ export default function Leaderboard() {
 
                 border-black/5
 
-                dark:bg-[#050505]/90
+                dark:bg-black/15
 
-                bg-white/70
+                bg-white/15
 
                 px-5
                 py-4
@@ -838,28 +894,53 @@ export default function Leaderboard() {
 
         {/* GRID */}
 
-        <div
-          className="
-            grid
+        {error ? (
+          <div
+            className="rounded-3xl border border-rose-300/60 bg-rose-50/70 p-6 text-rose-900 dark:border-rose-300/20 dark:bg-rose-300/[0.06] dark:text-rose-100"
+            role="alert"
+          >
+            <p className="font-bold">The leaderboard could not be loaded.</p>
+            <p className="mt-1 text-sm opacity-80">{error}</p>
+            <button
+              type="button"
+              onClick={() => fetchAllLeaderboardData(true)}
+              className="mt-4 rounded-full border border-current px-4 py-2 text-sm font-bold transition hover:bg-rose-900/10 dark:hover:bg-white/10"
+            >
+              Try again
+            </button>
+          </div>
+        ) : allDataNull ? (
+          <div className="rounded-3xl border border-dashed border-gray-300/70 p-10 text-center text-gray-600 dark:border-white/15 dark:text-white/50">
+            No contributor data is available yet. Please check back shortly.
+          </div>
+        ) : filteredUsers.length === 0 ? (
+          <div className="rounded-3xl border border-dashed border-gray-300/70 p-10 text-center text-gray-600 dark:border-white/15 dark:text-white/50">
+            No contributors match “{search.trim()}”.
+          </div>
+        ) : (
+          <div
+            className="
+              grid
 
-            gap-6
+              gap-6
 
-            sm:grid-cols-2
+              sm:grid-cols-2
 
-            lg:grid-cols-3
+              lg:grid-cols-3
 
-            xl:grid-cols-4
-          "
-        >
-          {filteredUsers.map((user, index) => (
-            <UserCard
-              key={user.username}
-              user={user}
-              index={index}
-              filterActive={filterActive}
-            />
-          ))}
-        </div>
+              xl:grid-cols-4
+            "
+          >
+            {filteredUsers.map((user) => (
+              <UserCard
+                key={user.username}
+                user={user}
+                filterActive={filterActive}
+                onSelect={setSelectedUser}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

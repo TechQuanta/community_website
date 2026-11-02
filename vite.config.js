@@ -26,9 +26,20 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 import { visualizer } from 'rollup-plugin-visualizer';
 
+const base = process.env.VERCEL === '1'
+  ? '/'
+  : '/Tech_Quanta_community_website/';
+
 export default defineConfig({
-  plugins: [react()],
-  // base: '/', // <--- CHANGE THIS LINE!
+  plugins: [
+    react(),
+    visualizer({
+      open: false,
+      filename: 'bundle-analysis.html',
+      gzipSize: true,
+    }),
+  ],
+  base,
   envPrefix: [
     'VITE_',
     'GOOGLE_MACRO_API',

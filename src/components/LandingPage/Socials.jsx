@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 
 // Import icons from react-icons
 import { FaDiscord, FaGithub, FaWhatsapp, FaDocker, FaLinkedinIn } from 'react-icons/fa';
@@ -77,60 +78,98 @@ const communityLinks = [
   },
 ];
 
-// Confetti component for the visual effect - now accepts an icon to render
-const ConfettiOverlay = ({ icon: ConfettiIcon, iconColor }) => {
-  const confettiPieces = Array.from({ length: 200 }).map((_, i) => { // Increased to 200 pieces
-    const size = Math.floor(Math.random() * (8 - 5 + 1) + 5); // Random size between h-5 and h-8
-    const style = {
-      left: `${Math.random() * 100}vw`,
-      animationDelay: `${Math.random() * 2}s`,
-      animationDuration: `${2 + Math.random() * 2}s`,
-      transform: `rotate(${Math.random() * 360}deg)`,
-      opacity: Math.random() * 0.5 + 0.5,
-      color: iconColor, // Apply the specific icon color
-    };
-    return (
-      <div key={i} className="confetti-piece" style={style}>
-        {React.cloneElement(ConfettiIcon, { className: `h-${size} w-${size}` })} {/* Render the icon with random size */}
-      </div>
-    );
-  });
+const SOCIAL_RAIN_ICONS = [
+  { icon: <FaDiscord />, color: "#4f46e5" },
+  { icon: <FaGithub />, color: "#111827" },
+  { icon: <FaWhatsapp />, color: "#22c55e" },
+  { icon: <FaDocker />, color: "#2563eb" },
+  { icon: <FaLinkedinIn />, color: "#1d4ed8" },
+];
 
-  return (
-    <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
-      {/* Embedded CSS for confetti animation - for debugging in Canvas */}
+// Confetti component for the visual effect - now accepts an icon to render
+export const ConfettiOverlay = ({ icon: ConfettiIcon, iconColor, duration = 2 }) => {
+  const rainColor = {
+    "text-indigo-600": "#4f46e5",
+    "text-gray-900": "#111827",
+    "text-green-500": "#22c55e",
+    "text-blue-600": "#2563eb",
+    "text-blue-700": "#1d4ed8",
+  }[iconColor] || iconColor;
+
+  const confettiPieces = React.useMemo(
+    () =>
+      Array.from({ length: 84 }).map((_, index) => {
+        const selectedIcon = index % 4 === 0;
+        const rainIcon = selectedIcon
+          ? { icon: ConfettiIcon, color: rainColor }
+          : SOCIAL_RAIN_ICONS[index % SOCIAL_RAIN_ICONS.length];
+        const size = Math.floor(Math.random() * 16) + 14;
+        const style = {
+          left: `${Math.random() * 100}vw`,
+          // Start drops throughout the viewport immediately, so the effect is
+          // visible on large desktop screens as soon as a social link is clicked.
+          animationDelay: `-${(Math.random() * duration).toFixed(2)}s`,
+          animationDuration: `${(1.5 + Math.random() * 0.9).toFixed(2)}s`,
+          "--rain-drift": `${Math.round((Math.random() - 0.5) * 28)}vw`,
+          "--rain-spin": `${Math.round(360 + Math.random() * 720)}deg`,
+          color: rainIcon.color,
+          opacity: 0.75 + Math.random() * 0.25,
+        };
+
+        return (
+          <div key={index} className="social-icon-rain" style={style}>
+            {React.cloneElement(rainIcon.icon, {
+              "aria-hidden": true,
+              style: { width: size, height: size },
+            })}
+          </div>
+        );
+      }),
+    [ConfettiIcon, duration, rainColor]
+  );
+
+  const overlay = (
+    <div className="pointer-events-none fixed inset-0 z-[2147483647] overflow-hidden" aria-hidden="true">
       <style>
         {`
-        @keyframes confetti-fall {
+        @keyframes social-icon-rain {
           0% {
-            transform: translateY(-100vh) rotateZ(0deg);
+            transform: translate3d(0, -12vh, 0) rotate(0deg) scale(0.72);
             opacity: 0;
           }
-          10% {
+          12% {
             opacity: 1;
           }
           100% {
-            transform: translateY(100vh) rotateZ(720deg);
+            transform: translate3d(var(--rain-drift), 115vh, 0) rotate(var(--rain-spin)) scale(1);
             opacity: 0;
           }
         }
 
-        .confetti-piece {
+        .social-icon-rain {
           position: absolute;
-          /* Size is now dynamically set by React.cloneElement */
-          display: flex; /* To center the icon within the div */
+          top: 0;
+          display: flex;
           align-items: center;
           justify-content: center;
-          animation: confetti-fall linear forwards;
+          animation-name: social-icon-rain;
+          animation-timing-function: linear;
+          animation-iteration-count: infinite;
+          animation-fill-mode: both;
           pointer-events: none;
-          filter: drop-shadow(0 0 5px rgba(0,0,0,0.3)); /* Subtle shadow for icons */
-          animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smoother animation */
+          will-change: transform, opacity;
+          filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35));
         }
+
         `}
       </style>
       {confettiPieces}
     </div>
   );
+
+  // A portal prevents desktop containers with transforms, filters, or overflow
+  // from creating a stacking context that can hide a fixed-position animation.
+  return typeof document === 'undefined' ? overlay : createPortal(overlay, document.body);
 };
 
 // Main Community Join Section Component: Renders the UI for joining the community.
@@ -150,7 +189,7 @@ const CommunityJoinSection = () => {
       setShowConfetti(false);
       setSelectedIcon(null); // Clear the icon state
       setSelectedIconColor(''); // Clear the color state
-      window.open(url, '_blank', 'noopener,noreferrer');
+      window.location.assign(url);
     }, 2000);
   };
 
@@ -192,8 +231,6 @@ const CommunityJoinSection = () => {
               {/* Right Side - Desktop Button: Unique Shape with Animation */}
               <a
                 href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
                 onClick={(e) => handleClick(e, link.url, link.icon, link.iconColor)}
                 className={`animated-button hidden md:inline-flex`} /* Apply custom class, remove Tailwind width/height here */
                 style={{
@@ -214,8 +251,6 @@ const CommunityJoinSection = () => {
               {/* Right Side - Mobile Link: Visible on small screens. */}
               <a
                 href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
                 onClick={(e) => handleClick(e, link.url, link.icon, link.iconColor)}
                 className="md:hidden flex items-center justify-start w-full
                   text-blue-600 dark:text-blue-400 font-normal

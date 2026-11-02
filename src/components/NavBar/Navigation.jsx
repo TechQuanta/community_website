@@ -1,162 +1,102 @@
-import {
-  Navbar,
-  NavBody,
-  NavItems,
-  MobileNav,
-  NavbarLogo,
-  NavbarButton,
-  MobileNavHeader,
-  MobileNavToggle,
-  MobileNavMenu,
-} from "../ui/resizable-navbar";
-import { useState, useEffect, useMemo } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { Menu, X } from "lucide-react";
+import { NavLink } from "react-router-dom";
 import lightlogo from "../../assets/lightlogo.png";
 import darklogo from "../../assets/darklogo.png";
-import SplitText from "../../components/ui/SplitText";
 
-// Custom hook to detect dark mode preference
-function usePrefersDarkMode() {
-  const [isDark, setIsDark] = useState(() => window.matchMedia("(prefers-color-scheme: dark)").matches);
+const navItems = [
+  { name: "Projects", link: "/open-source-contributions" },
+  { name: "Community", link: "/community-work" },
+  { name: "Leaderboard", link: "/leaderboard" },
+  { name: "About", link: "/about" },
+];
 
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = (e) => setIsDark(e.matches);
-    mediaQuery.addEventListener("change", handler);
-    return () => mediaQuery.removeEventListener("change", handler);
-  }, []);
+const joinUrl =
+  "https://docs.google.com/forms/d/e/1FAIpQLSddiwCoTtyjxuvKq6nPvgE6FXDjlMAz-35X2w8XFqscTDcYuw/viewform?usp=header";
 
-  return isDark;
+const linkClass = ({ isActive }) =>
+  `!transition-none font-rajdhani text-base font-semibold uppercase tracking-wide ${
+    isActive
+      ? "!text-[#2ECC71] dark:!text-[#00BFFF]"
+      : "!text-gray-700 hover:!text-[#2ECC71] dark:!text-gray-200 dark:hover:!text-[#00BFFF]"
+  }`;
+
+function Brand() {
+  return (
+    <NavLink to="/" end aria-label="TechQuanta home" className="flex items-center gap-2">
+      <img src={darklogo} alt="" width={34} height={34} className="block dark:hidden" />
+      <img src={lightlogo} alt="" width={34} height={34} className="hidden dark:block" />
+      <span className="font-rajdhani text-lg font-bold !text-gray-900 dark:!text-white">
+        TechQuanta
+      </span>
+    </NavLink>
+  );
 }
 
-const handleAnimationComplete = () => {
-  console.log("All letters have animated!");
-};
+function JoinLink({ mobile = false }) {
+  return (
+    <a
+      href={joinUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`!transition-none inline-flex items-center justify-center rounded-full bg-[#2ECC71]/15 px-5 py-2 font-rajdhani font-bold !text-gray-900 hover:bg-[#2ECC71]/25 dark:bg-[#00BFFF]/15 dark:!text-white dark:hover:bg-[#00BFFF]/25 ${
+        mobile ? "w-full" : "shrink-0"
+      }`}
+    >
+      Join the Community
+    </a>
+  );
+}
 
 function Header() {
-  const location = useLocation();
-  const isDark = usePrefersDarkMode();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const navItems = useMemo(() => [
-    // { name: "Events", link: "community-work" },
-    { name: " Projects", link: "open-source-contributions" },
-    { name: " ▂ ▄ ▅ ▆ ▇ █ LeaaderBoard", link: "leaderboard" },
-    { name: "About", link: "about" },
-  ], []);
-
-  // Helper to generate classes for nav items
-  const getNavItemClass = (item) => {
-    const baseClass = location.pathname === `/${item.link}`
-      ? "text-[#2ECC71]"
-      : "text-neutral-300 hover:text-white";
-
-    const fontWeight = ["Community Work", "LeaderBoard"].includes(item.name) ? "font-bold" : "font-normal";
-
-    return `${baseClass} ${fontWeight} font-rajdhani`;
-  };
-
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 w-full text-white font-rajdhani shadow-blue-900/30">
-      <Navbar className="max-w-7xl mx-auto px-4 text-[#2ECC71]">
-        {/* Desktop Nav */}
-        <NavBody>
-          <div
-            className="z-20 flex items-center  py-1 text-lg font-semibold"
-            aria-label="Homepage"
-          >
-            {/* The NavbarLogo component handles the logo and NavLink automatically */}
-            <NavbarLogo />
-            <span className="text-sm text-black dark:text-white select-none">Tech<span className="text-[1rem]">Quanta</span></span>
-              
-          </div>
+    <header className="fixed inset-x-0 top-0 z-50 w-full bg-white/25 text-gray-900 backdrop-blur-md dark:bg-black/20 dark:text-white">
+      <nav
+        aria-label="Main navigation"
+        className="mx-auto flex min-h-[72px] max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:px-8"
+      >
+        <Brand />
 
-          <NavItems
-            items={navItems.map((item) => ({
-              ...item,
-              isActive: location.pathname === `/${item.link}`,
-              className: item.name === "Community Work" || item.name === "LeaderBoard" ? "font-bold" : "",
-            }))}
-          />
+        <div className="hidden items-center justify-end gap-6 lg:flex xl:gap-8">
+          {navItems.map((item) => (
+            <NavLink key={item.link} to={item.link} className={linkClass}>
+              {item.name}
+            </NavLink>
+          ))}
+          <JoinLink />
+        </div>
 
-          <div className="flex items-center gap-4">
-            <NavbarButton
-              variant="primary"
-              className="dark:bg-transparent hover:bg-[#00BFFF] border-2 border-white hover:text-white text-black font-['Exo 2'] px-4  rounded-md py-1 rounded-r-full transition-all bg-[#00BFFF30] dark:text-white " 
-              onClick={() =>
-                window.open(
-                  "https://docs.google.com/forms/d/e/1FAIpQLSddiwCoTtyjxuvKq6nPvgE6FXDjlMAz-35X2w8XFqscTDcYuw/viewform?usp=header",
-                  "_blank",
-                )
-              }
-            >
-              <SplitText
-                  text=" Add Me !"
-                  delay={100}
-                  duration={0.6}
-                  ease="power3.out"
-                  splitType="chars"
-                  from={{ opacity: 0, y: 40 }}
-                  to={{ opacity: 1, y: 0 }}
-                  threshold={0.1}
-                  rootMargin="-100px"
-                  onLetterAnimationComplete={handleAnimationComplete}
-                />
-            </NavbarButton>
-          </div>
-        </NavBody>
+        <button
+          type="button"
+          onClick={() => setIsMobileMenuOpen((open) => !open)}
+          className="inline-flex items-center justify-center rounded-md p-2 text-gray-900 dark:text-white lg:hidden"
+          style={{ background: "transparent", border: 0, padding: 0, color: "inherit" }}
+          aria-expanded={isMobileMenuOpen}
+          aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+        >
+          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </nav>
 
-        {/* Mobile Nav */}
-        <MobileNav>
-          <MobileNavHeader>
-            {/* FIX: Simplified the Mobile Logo section. 
-                NavbarLogo already contains a NavLink to "/" and handles dark/light mode images. */}
-            <div className="flex items-center space-x-2">
-                <NavbarLogo />
-                <span className="text-lg font-semibold text-white dark:text-white select-none">Tech<span className="text-base">Quanta</span></span>
-            </div>
-            
-            <MobileNavToggle
-              isOpen={isMobileMenuOpen}
-              onClick={() => setIsMobileMenuOpen((open) => !open)}
-              aria-expanded={isMobileMenuOpen}
-              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-            />
-          </MobileNavHeader>
-
-          <MobileNavMenu
-            isOpen={isMobileMenuOpen}
-            onClose={() => setIsMobileMenuOpen(false)}
-          >
-            {navItems.map((item, idx) => (
+      {isMobileMenuOpen && (
+        <div className="bg-white/35 px-4 py-5 backdrop-blur-md dark:bg-black/35 lg:hidden">
+          <div className="mx-auto flex max-w-7xl flex-col items-stretch gap-4">
+            {navItems.map((item) => (
               <NavLink
-                key={idx}
+                key={item.link}
                 to={item.link}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={getNavItemClass(item) + " block py-3 px-4 text-base rounded transition-colors"}
+                className={linkClass}
               >
                 {item.name}
               </NavLink>
             ))}
-
-            <div className="mt-6 flex flex-col gap-3 px-4">
-              <NavbarButton
-                variant="primary"
-                className="bg-[#00BFFF] hover:bg-[#8E44AD] text-white font-semibold px-4 py-1 rounded-full transition-all"
-                style={{ boxShadow: "0 0 10px #2ECC71" }}
-                onClick={() =>
-                  window.open(
-                    "https://docs.google.com/forms/d/e/1FAIpQLSddiwCoTtyjxuvKq6nPvgE6FXDjlMAz-35X2w8XFqscTDcYuw/viewform?usp=header",
-                    "_blank"
-                  )
-                }
-              >
-                Join
-              </NavbarButton>
-            </div>
-          </MobileNavMenu>
-        </MobileNav>
-      </Navbar>
+            <JoinLink mobile />
+          </div>
+        </div>
+      )}
     </header>
   );
 }

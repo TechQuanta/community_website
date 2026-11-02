@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 
 // 1. Utility function (replaces import from "../../lib/utils")
 function cn(...classes) {
@@ -11,9 +11,8 @@ export const HeroHighlight = ({
   className,
   containerClassName
 }) => {
-  // Use standard useState instead of framer-motion's useMotionValue
-  const [mouseX, setMouseX] = useState(0);
-  const [mouseY, setMouseY] = useState(0);
+  const animationFrame = useRef(null);
+  const pendingPointer = useRef(null);
 
   // SVG patterns for different states and themes
   const dotPatterns = {
@@ -27,27 +26,39 @@ export const HeroHighlight = ({
     },
   };
 
-  const handleMouseMove = useCallback(({ currentTarget, clientX, clientY }) => {
+  const handlePointerMove = useCallback(({ currentTarget, clientX, clientY }) => {
     if (!currentTarget) return;
-    let { left, top } = currentTarget.getBoundingClientRect();
+    pendingPointer.current = { element: currentTarget, clientX, clientY };
 
-    // Update state directly, replacing mouseX.set and mouseY.set
-    setMouseX(clientX - left);
-    setMouseY(clientY - top);
+    if (animationFrame.current !== null) return;
+    animationFrame.current = window.requestAnimationFrame(() => {
+      const pointer = pendingPointer.current;
+      if (pointer) {
+        const { left, top } = pointer.element.getBoundingClientRect();
+        pointer.element.style.setProperty("--spotlight-x", `${pointer.clientX - left}px`);
+        pointer.element.style.setProperty("--spotlight-y", `${pointer.clientY - top}px`);
+      }
+      animationFrame.current = null;
+    });
   }, []);
 
-  // Calculate mask style dynamically (replaces useMotionTemplate)
-  const maskStyle = `radial-gradient(200px circle at ${mouseX}px ${mouseY}px, black 0%, transparent 100%)`;
+  useEffect(() => () => {
+    if (animationFrame.current !== null) {
+      window.cancelAnimationFrame(animationFrame.current);
+    }
+  }, []);
+
+  const maskStyle = "radial-gradient(200px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), black 0%, transparent 100%)";
 
   return (
     <div
       className={cn(
         // CRITICAL FIX: Removed fixed height h-[40rem] and centering (items-center, justify-center)
         // Added flex-grow and padding to ensure it uses available space and looks good.
-        "group relative flex flex-grow w-full bg-white dark:bg-[#121212] overflow-hidden min-h-96",
+        "group relative flex min-h-96 w-full min-w-0 flex-grow overflow-hidden bg-white dark:bg-[#121212]",
         containerClassName
       )}
-      onMouseMove={handleMouseMove}
+      onPointerMove={handlePointerMove}
     >
       {/* Default Dot Pattern (Light) */}
       <div
@@ -84,7 +95,7 @@ export const HeroHighlight = ({
       />
 
       {/* Content */}
-      <div className={cn("relative z-20 w-full p-8", className)}>
+      <div className={cn("relative z-20 w-full min-w-0 p-0", className)}>
         {children}
       </div>
     </div>

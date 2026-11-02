@@ -1,6 +1,6 @@
 // BecomeSpeakerSection.jsx
 import React, { useEffect, useRef, useState } from "react";
-
+import becomeSpeakerImage from "../../assets/speaker-community.svg";
 
 const BecomeSpeakerSection = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -14,7 +14,7 @@ const BecomeSpeakerSection = () => {
           observer.disconnect();
         }
       },
-      { threshold: 0.3 }
+      { threshold: 0.25 }
     );
 
     if (sectionRef.current) {
@@ -28,20 +28,14 @@ const BecomeSpeakerSection = () => {
     <section
       ref={sectionRef}
       className={`
-        relative overflow-hidden
-        w-full
-        uniform-background-gradient
-        py-24 px-6 sm:px-12 md:px-24
-        font-rajdhani
+        relative w-full overflow-hidden uniform-background-gradient px-4 py-16 font-rajdhani sm:px-8 sm:py-20 lg:px-12
         ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}
-        ease-out transform transition-opacity transition-transform duration-1000
+        ease-out transform transition-all duration-1000
       `}
       aria-label="Become a Speaker Section"
     >
-
-      {/* Center-Right Blob (MODIFIED AGAIN) */}
       <svg
-        className="absolute top-1/2 -translate-y-1/2 right-[-50px] md:right-[-80px] w-[380px] h-[380px] opacity-15 animate-blobFloat delay-4000" /* MODIFIED: right property */
+        className="pointer-events-none absolute top-1/2 -translate-y-1/2 right-[-50px] md:right-[-80px] w-[380px] h-[380px] opacity-15 animate-blobFloat"
         viewBox="0 0 200 200"
         xmlns="http://www.w3.org/2000/svg"
         fill="url(#gradBlob2)"
@@ -60,72 +54,46 @@ const BecomeSpeakerSection = () => {
         />
       </svg>
 
-      {/* Container */}
-      <div className="relative max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-12 z-10 items-center">
-        {/* Text Content */}
+      <div className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
         <div className="flex flex-col justify-center">
           <h2
             className="
-              text-5xl sm:text-6xl font-space-grotesk font-extrabold tracking-tight
-              bg-gradient-to-r from-primary to-tech-green
-              bg-clip-text text-transparent
-              animate-textShimmer
-              drop-shadow-lg
-              mb-8
+              text-4xl sm:text-5xl font-space-grotesk font-extrabold tracking-tight
+              bg-gradient-to-r from-primary to-tech-green bg-clip-text text-transparent
+              animate-textShimmer drop-shadow-lg mb-8
             "
           >
             Become a Speaker
           </h2>
 
-          <p
-            className="
-              text-lg sm:text-xl leading-relaxed text-gray-700 dark:text-gray-300
-              font-space-grotesk max-w-lg
-            "
-          >
-            Share your expertise and passion with a vibrant community by hosting workshops, sessions, or talks. Whether you're an industry professional, educator, or enthusiast, this is your opportunity to inspire others, expand your network, and showcase your unique insights. Join us to empower minds and drive meaningful conversations that spark innovation and growth.
+          <p className="text-lg sm:text-xl leading-relaxed text-gray-700 dark:text-gray-300 font-space-grotesk max-w-lg">
+            Share your expertise and passion with a vibrant community by hosting workshops, sessions, or talks. Whether you&apos;re an industry professional, educator, or enthusiast, this is your opportunity to inspire others, expand your network, and showcase your unique insights.
           </p>
 
           <button
             onClick={() =>
               window.open(
                 "https://docs.google.com/forms/d/e/1FAIpQLSevjGT1Nh8mNyc8MBovZn3EX1X_9P85OmozpJTe6edUkRpPDw/viewform?usp=header",
-                "_blank"
+                "_blank",
+                "noopener,noreferrer"
               )
             }
             aria-label="Host a Workshop or Session"
             className="
-              mt-10
-              w-max
-              px-8 py-4
-              bg-gradient-to-r from-primary to-tech-green
-              hover:from-tech-green hover:to-primary
-              text-white font-semibold tracking-wide rounded-3xl
-              shadow-md
-              transition-all duration-300 ease-in-out
-              transform hover:scale-105
-              focus:outline-none focus:ring-4 focus:ring-primary focus:ring-opacity-60
-              animate-pulseGlow
+              mt-8 flex w-full max-w-full items-center justify-center px-4 py-4 text-center text-sm leading-snug
+              bg-gradient-to-r from-primary to-tech-green hover:from-tech-green hover:to-primary
+              text-white font-semibold tracking-wide rounded-3xl shadow-md transition-all duration-300 ease-in-out
+              transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-primary focus:ring-opacity-60 animate-pulseGlow
+              sm:mt-10 sm:w-fit sm:px-6 sm:text-base
             "
           >
             🎤 Host a Workshop or Session
           </button>
         </div>
 
-        {/* Image */}
         <div
-          className="
-            relative
-            w-full
-            max-w-lg
-            mx-auto
-            md:mx-0
-            cursor-pointer
-            perspective-800
-            shadow-lg
-            overflow-hidden
-          "
-          onMouseMove={e => {
+          className="relative mx-auto aspect-[4/3] w-full max-w-lg cursor-pointer overflow-hidden rounded-3xl border border-white/20 shadow-lg perspective-800 lg:mx-0"
+          onMouseMove={(e) => {
             const card = e.currentTarget;
             const rect = card.getBoundingClientRect();
             const x = e.clientX - rect.left;
@@ -137,21 +105,20 @@ const BecomeSpeakerSection = () => {
 
             card.style.transform = `rotateX(${-rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
           }}
-          onMouseLeave={e => {
+          onMouseLeave={(e) => {
             e.currentTarget.style.transform = "rotateX(0deg) rotateY(0deg) scale(1)";
           }}
         >
           <img
-            src="https://ikfezffnmwcdmfcvnygk.supabase.co/storage/v1/object/public/banners/BecomeSpeakerBanner.png"
-            alt="Become a Speaker Banner"
-            className="w-full h-auto  object-cover select-none"
+            src={becomeSpeakerImage}
+            alt="An illustrated speaker sharing ideas with a community"
+            className="h-full w-full object-cover select-none"
             loading="lazy"
             draggable={false}
           />
         </div>
       </div>
 
-      {/* Keep existing styles, they are specific to this component's animations */}
       <style>{`
         @keyframes blobFloat {
           0%, 100% { transform: translateY(0) rotate(0deg); }
@@ -162,12 +129,8 @@ const BecomeSpeakerSection = () => {
         }
 
         @keyframes textShimmer {
-          0% {
-            background-position: -400%;
-          }
-          100% {
-            background-position: 400%;
-          }
+          0% { background-position: -400%; }
+          100% { background-position: 400%; }
         }
         .animate-textShimmer {
           background-size: 400% 100%;

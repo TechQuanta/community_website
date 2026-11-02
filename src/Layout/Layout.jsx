@@ -6,10 +6,10 @@ import { HeroHighlight } from "../components/ui/hero-highlight";
 
 const Layout = () => {
     return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex min-h-screen w-full min-w-0 flex-col">
       <Header />
       
-      <main className="flex-grow">
+      <main className="min-h-screen w-full min-w-0 flex-grow">
         <HeroHighlight>
           <Outlet /> {/* This content will now be pinned */}
         </HeroHighlight>

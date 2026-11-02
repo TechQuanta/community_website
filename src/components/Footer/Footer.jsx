@@ -1,23 +1,31 @@
-import React, { useContext, useMemo } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { ThemeContext } from "../../context/ThemeContext";
+import { ConfettiOverlay } from "../LandingPage/Socials";
 import {
   FaLinkedin,
   FaGithub,
-  FaTelegramPlane,
 } from "react-icons/fa";
 import { SiGmail, SiDocker } from "react-icons/si";
 import { PiGlobeSimple } from "react-icons/pi";
-import Cubes from '../ui/Cubes';
 
 const Footer = () => {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === "dark";
+  const [activeSocial, setActiveSocial] = useState(null);
+  const socialTimer = useRef(null);
 
-  // Cube colors remain dark (as requested)
-  const cubeFaceColor = "#1a1a2e"; 
-  // Adjusted border color to be light grey in light theme for better definition
-  const cubeBorderStyle = isDark ? "2px dashed #ff2781ff" : "2px dashed #a0a0a0"; 
-  
+  useEffect(() => () => window.clearTimeout(socialTimer.current), []);
+
+  const openSocialInCurrentTab = (event, href, icon) => {
+    event.preventDefault();
+    window.clearTimeout(socialTimer.current);
+    setActiveSocial({ icon, color: "#2ecc71" });
+    socialTimer.current = window.setTimeout(() => {
+      setActiveSocial(null);
+      window.location.assign(href);
+    }, 2000);
+  };
+
   // Footer background is transparent in both themes so cubes are visible
   const footerBgClass = isDark ? "bg-transparent text-white" : "bg-transparent text-black"; 
 
@@ -72,35 +80,11 @@ const Footer = () => {
 
   return (
     <footer
-      className={`font-space-grotesk px-6 sm:px-10 md:px-16 pt-6 pb-8 relative overflow-hidden ${footerBgClass}`}
+      className={`relative shrink-0 overflow-hidden px-6 pb-8 pt-6 font-space-grotesk sm:px-10 md:px-16 ${footerBgClass}`}
     >
-      <div 
-        style={{ 
-          height: '100%', 
-          position: 'absolute',
-          top: 0,
-          // CRITICAL FIX: Pin to right edge and set width to 100% of the parent content area
-          width: '100%',        
-          left: 'auto',          
-          right: '0',            
-          transform: 'none',     
-          // END CRITICAL FIX
-          zIndex: -1, 
-        }}
-      >
-        <Cubes 
-          gridSize={3} 
-          maxAngle={45}
-          radius={4}
-          borderStyle={cubeBorderStyle}
-          faceColor={cubeFaceColor} 
-          rippleColor="#ffffffff"
-          rippleSpeed={5}
-          autoAnimate={true}
-          rippleOnClick={true}
-        />
-      </div>
-
+      {activeSocial && (
+        <ConfettiOverlay icon={activeSocial.icon} iconColor={activeSocial.color} />
+      )}
       {/* The content remains on top */}
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-8 text-sm mb-12 justify-center items-start">
@@ -150,8 +134,7 @@ const Footer = () => {
                 <a
                   key={idx}
                   href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  onClick={(event) => openSocialInCurrentTab(event, href, icon)}
                   className="hover:text-blue-400 text-black dark:text-white"
                   aria-label={label}
                 >
